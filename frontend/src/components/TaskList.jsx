@@ -2,7 +2,7 @@ import React from 'react';
 import TaskCard from './TaskCard';
 import { FolderOpen, Plus } from 'lucide-react';
 
-export default function TaskList({ tasks, loading, onEdit, onDelete, onStatusChange, onOpenCreateModal }) {
+export default function TaskList({ tasks, loading, onEdit, onDelete, onStatusChange, onToggleSubtask, onOpenCreateModal }) {
   if (loading && tasks.length === 0) {
     return (
       <div className="empty-state">
@@ -36,6 +36,7 @@ export default function TaskList({ tasks, loading, onEdit, onDelete, onStatusCha
           onEdit={onEdit}
           onDelete={onDelete}
           onStatusChange={onStatusChange}
+          onToggleSubtask={onToggleSubtask}
         />
       ))}
     </div>

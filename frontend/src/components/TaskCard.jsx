@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar, Edit3, Trash2, Tag, ArrowUpRight } from 'lucide-react';
+import { Calendar, Edit3, Trash2, Tag, CheckSquare } from 'lucide-react';
 
-export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
+export default function TaskCard({ task, onEdit, onDelete, onStatusChange, onToggleSubtask }) {
   const getPriorityClass = (priority) => {
     switch (priority?.toLowerCase()) {
       case 'high': return 'high-priority';
@@ -39,6 +39,11 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
     onStatusChange(task.id, nextStatus);
   };
 
+  const subtasks = task.subtasks || [];
+  const totalSubtasks = subtasks.length;
+  const completedSubtasks = subtasks.filter(s => s.completed).length;
+  const progressPercent = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+
   return (
     <div className={`task-card ${getPriorityClass(task.priority)}`}>
       <div className="task-header">
@@ -65,6 +70,43 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
           {task.priority}
         </span>
       </div>
+
+      {totalSubtasks > 0 && (
+        <div className="subtasks-section">
+          <div className="subtasks-header">
+            <span className="subtasks-count">
+              <CheckSquare size={13} /> {completedSubtasks}/{totalSubtasks} Subtasks
+            </span>
+            <span className="subtasks-percentage">{progressPercent}%</span>
+          </div>
+          <div className="subtasks-progress-bg">
+            <div 
+              className="subtasks-progress-fill" 
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          <div className="subtasks-checklist">
+            {subtasks.map((st) => (
+              <div 
+                key={st.id} 
+                className={`subtask-item ${st.completed ? 'completed' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onToggleSubtask) onToggleSubtask(task.id, st.id);
+                }}
+              >
+                <input 
+                  type="checkbox" 
+                  checked={st.completed} 
+                  readOnly 
+                />
+                <span className="subtask-title">{st.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="task-footer">
         <div className="task-due">

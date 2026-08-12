@@ -5,7 +5,7 @@ import FilterBar from './components/FilterBar';
 import TaskList from './components/TaskList';
 import TaskFormModal from './components/TaskFormModal';
 import ToastNotification from './components/ToastNotification';
-import { fetchTasks, fetchStats, createTask, updateTask, deleteTask } from './api';
+import { fetchTasks, fetchStats, createTask, updateTask, deleteTask, toggleSubtask } from './api';
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
@@ -106,6 +106,15 @@ export default function App() {
     }
   };
 
+  const handleToggleSubtask = async (taskId, subtaskId) => {
+    try {
+      await toggleSubtask(taskId, subtaskId);
+      loadData();
+    } catch (err) {
+      addToast(err.message || 'Failed to update subtask', 'error');
+    }
+  };
+
   return (
     <div className="app-container">
       <Navbar 
@@ -128,6 +137,7 @@ export default function App() {
         onEdit={handleOpenEditModal}
         onDelete={handleDeleteTask}
         onStatusChange={handleStatusChange}
+        onToggleSubtask={handleToggleSubtask}
         onOpenCreateModal={handleOpenCreateModal}
       />
 
