@@ -62,3 +62,17 @@ export async function deleteTask(id) {
   }
   return response.json();
 }
+
+export async function toggleSubtask(taskId, subtaskId) {
+  const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/subtasks/${subtaskId}/toggle`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to toggle subtask");
+  }
+  return response.json();
+}

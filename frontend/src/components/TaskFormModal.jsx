@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Plus, Trash2, CheckSquare } from 'lucide-react';
 
 export default function TaskFormModal({ isOpen, onClose, onSave, taskToEdit }) {
   const [formData, setFormData] = useState({
@@ -9,7 +9,10 @@ export default function TaskFormModal({ isOpen, onClose, onSave, taskToEdit }) {
     priority: 'Medium',
     status: 'Pending',
     due_date: '',
+    subtasks: [],
   });
+
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
   useEffect(() => {
     if (taskToEdit) {
@@ -20,6 +23,7 @@ export default function TaskFormModal({ isOpen, onClose, onSave, taskToEdit }) {
         priority: taskToEdit.priority || 'Medium',
         status: taskToEdit.status || 'Pending',
         due_date: taskToEdit.due_date || '',
+        subtasks: taskToEdit.subtasks || [],
       });
     } else {
       setFormData({
@@ -29,11 +33,45 @@ export default function TaskFormModal({ isOpen, onClose, onSave, taskToEdit }) {
         priority: 'Medium',
         status: 'Pending',
         due_date: '',
+        subtasks: [],
       });
     }
+    setNewSubtaskTitle('');
   }, [taskToEdit, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleAddSubtask = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!newSubtaskTitle.trim()) return;
+    const newSubtask = {
+      id: 'st-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+      title: newSubtaskTitle.trim(),
+      completed: false,
+    };
+    setFormData({
+      ...formData,
+      subtasks: [...formData.subtasks, newSubtask],
+    });
+    setNewSubtaskTitle('');
+  };
+
+  const handleRemoveSubtask = (id) => {
+    setFormData({
+      ...formData,
+      subtasks: formData.subtasks.filter((st) => st.id !== id),
+    });
+  };
+
+  const handleToggleSubtaskInForm = (id) => {
+    setFormData({
+      ...formData,
+      subtasks: formData.subtasks.map((st) =>
+        st.id === id ? { ...st, completed: !st.completed } : st
+      ),
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -76,6 +114,60 @@ export default function TaskFormModal({ isOpen, onClose, onSave, taskToEdit }) {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
+            </div>
+
+            {/* Subtasks Section */}
+            <div className="form-group">
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CheckSquare size={16} /> Subtasks / Checklist
+              </label>
+
+              <div className="subtask-add-row" style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Add a subtask..."
+                  value={newSubtaskTitle}
+                  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddSubtask(e);
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={handleAddSubtask}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <Plus size={16} /> Add
+                </button>
+              </div>
+
+              {formData.subtasks.length > 0 && (
+                <div className="form-subtasks-list">
+                  {formData.subtasks.map((st) => (
+                    <div key={st.id} className="form-subtask-item">
+                      <input
+                        type="checkbox"
+                        checked={st.completed}
+                        onChange={() => handleToggleSubtaskInForm(st.id)}
+                      />
+                      <span className={st.completed ? 'completed-text' : ''}>{st.title}</span>
+                      <button
+                        type="button"
+                        className="btn-icon delete"
+                        onClick={() => handleRemoveSubtask(st.id)}
+                        title="Remove Subtask"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="form-row">

@@ -12,5 +12,7 @@ class Task(Base):
     priority = Column(String, default="Medium")
     status = Column(String, default="Pending", index=True)
     due_date = Column(String, nullable=True)
+    subtasks = Column(Text, default="[]")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+

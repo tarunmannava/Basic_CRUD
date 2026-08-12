@@ -1,6 +1,11 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List, Any
 from datetime import datetime
+
+class SubtaskItem(BaseModel):
+    id: str
+    title: str
+    completed: bool = False
 
 class TaskBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200, example="Design homepage layout")
@@ -9,6 +14,7 @@ class TaskBase(BaseModel):
     priority: str = Field(default="Medium", example="High")
     status: str = Field(default="Pending", example="In Progress")
     due_date: Optional[str] = Field(None, example="2026-08-15")
+    subtasks: List[SubtaskItem] = Field(default_factory=list)
 
 class TaskCreate(TaskBase):
     pass
@@ -20,6 +26,7 @@ class TaskUpdate(BaseModel):
     priority: Optional[str] = None
     status: Optional[str] = None
     due_date: Optional[str] = None
+    subtasks: Optional[List[SubtaskItem]] = None
 
 class TaskResponse(TaskBase):
     id: int

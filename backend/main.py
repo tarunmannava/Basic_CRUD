@@ -8,6 +8,8 @@ import schemas
 import crud
 from database import engine, get_db
 
+from sqlalchemy import text, or_
+
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
@@ -26,9 +28,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Seed initial data if DB is empty
+# Seed initial data if DB is empty & ensure subtasks column exists
 @app.on_event("startup")
-def seed_initial_data():
+def startup_event():
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("SELECT subtasks FROM tasks LIMIT 1"))
+        except Exception:
+            conn.execute(text("ALTER TABLE tasks ADD COLUMN subtasks TEXT DEFAULT '[]'"))
+            conn.commit()
+
     db = next(get_db())
     if db.query(models.Task).count() == 0:
         sample_tasks = [
@@ -38,7 +47,8 @@ def seed_initial_data():
                 category="Work",
                 priority="High",
                 status="Completed",
-                due_date="2026-08-01"
+                due_date="2026-08-01",
+                subtasks='[{"id": "s1", "title": "Setup FastAPI models", "completed": true}, {"id": "s2", "title": "Setup React layout", "completed": true}]'
             ),
             models.Task(
                 title="Implement Dark & Light Theme UI",
@@ -46,7 +56,8 @@ def seed_initial_data():
                 category="Design",
                 priority="High",
                 status="In Progress",
-                due_date="2026-08-05"
+                due_date="2026-08-05",
+                subtasks='[{"id": "s1", "title": "Color palette selection", "completed": true}, {"id": "s2", "title": "CSS transition animations", "completed": false}]'
             ),
             models.Task(
                 title="Prepare Documentation & Walkthrough",
@@ -54,7 +65,8 @@ def seed_initial_data():
                 category="Documentation",
                 priority="Medium",
                 status="Pending",
-                due_date="2026-08-10"
+                due_date="2026-08-10",
+                subtasks='[{"id": "s1", "title": "Draft implementation plan", "completed": true}, {"id": "s2", "title": "Create walkthrough document", "completed": false}]'
             ),
             models.Task(
                 title="Explore AI Integration Features",
@@ -62,7 +74,8 @@ def seed_initial_data():
                 category="Ideas",
                 priority="Low",
                 status="Pending",
-                due_date="2026-08-20"
+                due_date="2026-08-20",
+                subtasks='[]'
             )
         ]
         db.add_all(sample_tasks)
@@ -108,9 +121,17 @@ def update_task(task_id: int, task: schemas.TaskUpdate, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="Task not found")
     return updated_task
 
+@app.put("/api/tasks/{task_id}/subtasks/{subtask_id}/toggle", response_model=schemas.TaskResponse)
+def toggle_subtask(task_id: int, subtask_id: str, db: Session = Depends(get_db)):
+    updated_task = crud.toggle_subtask(db=db, task_id=task_id, subtask_id=subtask_id)
+    if not updated_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return updated_task
+
 @app.delete("/api/tasks/{task_id}", status_code=status.HTTP_200_OK)
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     success = crud.delete_task(db=db, task_id=task_id)
     if not success:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "Task successfully deleted", "id": task_id}
+
