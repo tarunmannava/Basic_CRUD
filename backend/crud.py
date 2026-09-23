@@ -141,3 +141,12 @@ def get_stats(db: Session):
         "high_priority": high_priority
     }
 
+def bulk_update_status(db: Session, task_ids: List[int], status: str) -> int:
+    now = datetime.now(timezone.utc)
+    updated = db.query(Task).filter(Task.id.in_(task_ids)).update(
+        {Task.status: status, Task.updated_at: now},
+        synchronize_session=False,
+    )
+    db.commit()
+    return updated
+
