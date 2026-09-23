@@ -130,6 +130,15 @@ def toggle_subtask(task_id: int, subtask_id: str, db: Session = Depends(get_db))
         raise HTTPException(status_code=404, detail="Task not found")
     return updated_task
 
+@app.delete("/api/tasks/completed", status_code=status.HTTP_200_OK)
+def clear_completed_tasks(db: Session = Depends(get_db)):
+    deleted_count = crud.clear_completed_tasks(db=db)
+    return {
+        "status": "ok",
+        "deleted_count": deleted_count,
+        "message": f"Successfully deleted {deleted_count} completed task(s)",
+    }
+
 @app.delete("/api/tasks/{task_id}", status_code=status.HTTP_200_OK)
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     success = crud.delete_task(db=db, task_id=task_id)

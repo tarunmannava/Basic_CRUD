@@ -118,6 +118,11 @@ def toggle_subtask(db: Session, task_id: int, subtask_id: str):
     db.refresh(db_task)
     return format_task_dict(db_task)
 
+def clear_completed_tasks(db: Session) -> int:
+    deleted_count = db.query(Task).filter(Task.status.ilike("completed")).delete(synchronize_session=False)
+    db.commit()
+    return deleted_count
+
 def delete_task(db: Session, task_id: int):
     db_task = get_task_model(db, task_id)
     if not db_task:
