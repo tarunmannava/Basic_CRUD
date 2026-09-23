@@ -96,12 +96,13 @@ def read_tasks(
     status: Optional[str] = Query(None, description="Filter by status"),
     priority: Optional[str] = Query(None, description="Filter by priority"),
     has_subtasks: Optional[bool] = Query(None, description="Filter tasks by whether they have subtasks checklist items"),
+    due_before: Optional[str] = Query(None, description="Filter tasks due on or before specified date string (e.g. YYYY-MM-DD)"),
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
     return crud.get_tasks(
-        db, search=search, category=category, status=status, priority=priority, has_subtasks=has_subtasks, skip=skip, limit=limit
+        db, search=search, category=category, status=status, priority=priority, has_subtasks=has_subtasks, due_before=due_before, skip=skip, limit=limit
     )
 
 @app.get("/api/tasks/{task_id}", response_model=schemas.TaskResponse)

@@ -38,6 +38,7 @@ def get_tasks(
     status: str = None,
     priority: str = None,
     has_subtasks: bool = None,
+    due_before: str = None,
     skip: int = 0,
     limit: int = 100
 ):
@@ -57,6 +58,8 @@ def get_tasks(
         query = query.filter(Task.subtasks.isnot(None), Task.subtasks != "[]", Task.subtasks != "")
     elif has_subtasks is False:
         query = query.filter(or_(Task.subtasks.is_(None), Task.subtasks == "[]", Task.subtasks == ""))
+    if due_before:
+        query = query.filter(Task.due_date.isnot(None), Task.due_date <= due_before)
     
     tasks = query.order_by(Task.updated_at.desc()).offset(skip).limit(limit).all()
     return [format_task_dict(t) for t in tasks]
