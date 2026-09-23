@@ -33,11 +33,13 @@ A modern, responsive full-stack task management application with a **FastAPI** R
   * `status` (string): Filter by status (`Pending`, `In Progress`, `Completed`).
   * `priority` (string): Filter by priority (`Low`, `Medium`, `High`).
   * `skip` (int) / `limit` (int): Pagination controls.
-* `GET /api/tasks/{task_id}`: Retrieve a single task by ID.
+* `GET /api/tasks/{task_id}`: Retrieve a single task by ID (includes `subtasks` checklist array).
 * `POST /api/tasks`: Create a new task.
-  * Body: `TaskCreate` (`title`, `description`, `category`, `priority`, `status`, `due_date`).
+  * Body: `TaskCreate` (`title`, `description`, `category`, `priority`, `status`, `due_date`, `subtasks`).
+  * `subtasks` (array, optional): List of `SubtaskItem` objects (`id`, `title`, `completed=false`).
 * `PUT /api/tasks/{task_id}`: Update an existing task.
-  * Body: `TaskUpdate` (optional partial updates to task fields).
+  * Body: `TaskUpdate` (optional partial updates to task fields, including `subtasks` array to replace the checklist).
+* `PUT /api/tasks/{task_id}/subtasks/{subtask_id}/toggle`: Toggle a subtask's `completed` state by ID. Returns the updated task.
 * `DELETE /api/tasks/{task_id}`: Delete a task by ID.
 
 ---
@@ -54,8 +56,25 @@ A modern, responsive full-stack task management application with a **FastAPI** R
 | `priority` | String | Priority level (`Low`, `Medium`, `High`) |
 | `status` | String | Current status (`Pending`, `In Progress`, `Completed`) |
 | `due_date` | String | Optional due date string |
+| `subtasks` | Array of `SubtaskItem` | Checklist items (`id`, `title`, `completed`); stored as JSON text, defaults to `[]` |
 | `created_at` | DateTime | Timestamp of creation |
 | `updated_at` | DateTime | Timestamp of last modification |
+
+### SubtaskItem
+| Field | Type | Description |
+|---|---|---|
+| `id` | String | Client-generated subtask identifier (e.g. `st-1`) |
+| `title` | String | Subtask title |
+| `completed` | Boolean | Completion flag (default: `false`) |
+
+Example `subtasks` payload:
+```json
+"subtasks": [
+  { "id": "st-1", "title": "Setup FastAPI models", "completed": true },
+  { "id": "st-2", "title": "Setup React layout", "completed": false }
+]
+```
+The frontend shows checklist progress (`completed/total` + %) on each task card, allows toggling items inline via `PUT /api/tasks/{task_id}/subtasks/{subtask_id}/toggle`, and manages the list (add/remove/toggle) in the task create/edit modal.
 
 ---
 
