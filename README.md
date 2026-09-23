@@ -33,6 +33,7 @@ A modern, responsive full-stack task management application with a **FastAPI** R
   * `status` (string): Filter by status (`Pending`, `In Progress`, `Completed`).
   * `priority` (string): Filter by priority (`Low`, `Medium`, `High`).
   * `has_subtasks` (boolean, optional): Filter tasks by whether they have subtasks checklist items (`true` = only tasks with at least one subtask, `false` = only tasks with no subtasks; omit to return all tasks).
+  * `due_before` (string, optional): Filter tasks due on or before specified date string (e.g. `YYYY-MM-DD`; only tasks with a non-null `due_date <= due_before` are returned; omit to return all tasks).
   * `skip` (int) / `limit` (int): Pagination controls.
 * `GET /api/tasks/{task_id}`: Retrieve a single task by ID (includes `subtasks` checklist array).
 * `POST /api/tasks`: Create a new task.
