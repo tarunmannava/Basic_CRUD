@@ -42,3 +42,12 @@ class StatsResponse(BaseModel):
     in_progress: int
     pending: int
     high_priority: int
+
+class BulkStatusUpdate(BaseModel):
+    task_ids: List[int] = Field(..., min_length=1, example=[1, 2, 3])
+    status: str = Field(..., example="Completed")
+
+class BulkStatusResponse(BaseModel):
+    updated_count: int
+    task_ids: List[int]
+    message: str

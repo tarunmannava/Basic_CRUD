@@ -105,6 +105,16 @@ def read_tasks(
         db, search=search, category=category, status=status, priority=priority, has_subtasks=has_subtasks, due_before=due_before, skip=skip, limit=limit
     )
 
+@app.patch("/api/tasks/bulk/status", response_model=schemas.BulkStatusResponse)
+def bulk_update_tasks_status(payload: schemas.BulkStatusUpdate, db: Session = Depends(get_db)):
+    """Bulk update the status of multiple tasks at once."""
+    updated = crud.bulk_update_status(db, payload.task_ids, payload.status)
+    return schemas.BulkStatusResponse(
+        updated_count=updated,
+        task_ids=payload.task_ids,
+        message=f"Successfully updated status to '{payload.status}' for {updated} tasks."
+    )
+
 @app.get("/api/tasks/{task_id}", response_model=schemas.TaskResponse)
 def read_task(task_id: int, db: Session = Depends(get_db)):
     task = crud.get_task(db, task_id=task_id)

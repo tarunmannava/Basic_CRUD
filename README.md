@@ -42,6 +42,9 @@ A modern, responsive full-stack task management application with a **FastAPI** R
 * `PUT /api/tasks/{task_id}`: Update an existing task.
   * Body: `TaskUpdate` (optional partial updates to task fields, including `subtasks` array to replace the checklist).
 * `PUT /api/tasks/{task_id}/subtasks/{subtask_id}/toggle`: Toggle a subtask's `completed` state by ID. Returns the updated task.
+* `PATCH /api/tasks/bulk/status`: Bulk update the status of multiple tasks at once.
+  * Body: `BulkStatusUpdate` (`task_ids`: array of integer IDs, `status`: target status string e.g. "Completed").
+  * Returns: `BulkStatusResponse` (`updated_count`, `task_ids`, `message`).
 * `DELETE /api/tasks/{task_id}`: Delete a task by ID.
 
 ---
